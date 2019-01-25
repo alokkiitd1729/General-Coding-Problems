@@ -6,7 +6,8 @@
  *    Indian Institute of Technology(IIT) Delhi
  *
  *    Link for the problem:- https://practice.geeksforgeeks.org/problems/vertical-width-of-a-binary-tree/1
- 
+ *    Problem Statement:-
+ *               Given a Binary Tree of N nodes. The task is to find the vertical width of the tree.
  */
 class Node
 {
