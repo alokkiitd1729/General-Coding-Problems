@@ -1,0 +1,43 @@
+/**
+ *     Date:- 2019-01-16
+ *         Author:- @_Alok_Kumar
+ *    Indian Institute of Technology(IIT) Delhi
+ *
+ *    Link for the problem:- https://practice.geeksforgeeks.org/problems/vertical-sum/1
+ *    
+ *             
+ */
+ 
+ 
+ Node is as follows:
+class Node{
+int data;
+Node left, right;
+Node(int item)
+{
+    data = item;
+    left = right = null
+}
+}
+
+class GfG
+{
+    static int arr[]=new int[50];
+    static void travel(Node root,int index){
+        if(root==null){return;}
+        else{arr[index]+=root.data;}
+        travel(root.left,index-1);travel(root.right,index+1);
+    }
+    public static void printVertical(Node root)
+    {
+        Arrays.fill(arr,0);
+        travel(root,25);
+        for(int i=0;i<50;i++){
+            if(arr[i]!=0){
+                System.out.print(arr[i]+" ");
+            }
+        }
+        
+    }
+    
+}
