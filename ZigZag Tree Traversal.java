@@ -5,7 +5,7 @@
  *         Author:- @_Alok_Kumar
  *    Indian Institute of Technology(IIT) Delhi
  *
- *    Link for the problem:- https://practice.geeksforgeeks.org/problems/vertical-width-of-a-binary-tree/1
+ *    Link for the problem:- https://practice.geeksforgeeks.org/problems/zigzag-tree-traversal/1
  *    
  *             
  */
