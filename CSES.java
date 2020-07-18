@@ -12,10 +12,6 @@ static long[] long_arr() throws IOException{String[] a=read().split(" ");long[] 
 static void sort(int[] a){List<Integer> l=new ArrayList<>();for(int z:a){l.add(z);}Collections.sort(l);for(int i=0;i<a.length;i++){a[i]=l.get(i);}}
 //static void sorthd(int[][] a){List<int[]> l=new ArrayList<>();for(int[] x:a){l.add(x);}Collections.sort(l,(a1,b1)->f(a1,b1));for(int i=0;i<a.length;i++){a[i]=l.get(i);}}
 static void assign(){s1=new BufferedReader(new InputStreamReader(System.in));out=new BufferedWriter(new OutputStreamWriter(System.out));}
-static long Modpow(long a,long p,long m){long res=1;while(p>0){if((p&1)!=0){res=(res*a)%m;}p >>=1;a=(a*a)%m;}return res;}
-static long Modmul(long a,long b,long m){return ((a%m)*(b%m))%m;}
-static long ModInv(long a,long m){return Modpow(a,m-2,m);}
-static long mod=(long)1e9+7;
 //......................................@uthor_Alx..............................................
 static void update(int x, int delta,int[] BIT){
        while(x<BIT.length){
