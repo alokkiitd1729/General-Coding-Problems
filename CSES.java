@@ -10,7 +10,6 @@ static long long_v(String s1){return Long.parseLong(s1);}
 static int[] int_arr() throws IOException{String[] a=read().split(" ");int[] b=new int[a.length];for(int i=0;i<a.length;i++){b[i]=int_v(a[i]);}return b;}
 static long[] long_arr() throws IOException{String[] a=read().split(" ");long[] b=new long[a.length];for(int i=0;i<a.length;i++){b[i]=long_v(a[i]);}return b;}
 static void sort(int[] a){List<Integer> l=new ArrayList<>();for(int z:a){l.add(z);}Collections.sort(l);for(int i=0;i<a.length;i++){a[i]=l.get(i);}}
-//static void sorthd(int[][] a){List<int[]> l=new ArrayList<>();for(int[] x:a){l.add(x);}Collections.sort(l,(a1,b1)->f(a1,b1));for(int i=0;i<a.length;i++){a[i]=l.get(i);}}
 static void assign(){s1=new BufferedReader(new InputStreamReader(System.in));out=new BufferedWriter(new OutputStreamWriter(System.out));}
 //......................................@uthor_Alx..............................................
 static void update(int x, int delta,int[] BIT){
