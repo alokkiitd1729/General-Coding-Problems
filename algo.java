@@ -22,11 +22,12 @@ static long[] f;
 
 static String setpreciosion(double d,int k){BigDecimal d1 = new BigDecimal(Double.toString(d));return d1.setScale(k,RoundingMode.UP).toString();//UP DOWN,  .doubleValue()} 
 // rec Inv
-long[] inv=new long[1000001];Arrays.fill(inv,1l);
- for(int i = 2; i < 1e6+1; i++){
-      inv[i] =((mod-mod/i)*inv[mod%i])%mod;
+long[] inv=new long[1000001];inv[0]=inv[1]=1;
+    inv[i]=mod-Modmul(mod/i,inv[mod%i],mod);
   }
-// KMP/Z function String processing
+// KMP/Z function String processing... S-riginal string
+// KMP ->  P[i] = length  of longest prefix which is also suffix of S[0.....i](S.substring(0,i));
+// Z[i] = length of longest prefix of S which is also prefix of (the suffix string S[i,i+1,...n] - i.e suffix of S starting at i)
 //  KMP to Z — for i=1;i<n      Z[i−P[i]+1]=max(Z[i−P[i]+1],P[i])
 //  Z to KMP — for i=1;i<n      P[i+Z[i]−1]=max(P[i+Z[i]−1],z[i])
 static int kmp(String s2){
@@ -67,6 +68,97 @@ static void babystep(int g, int h, int p) throws  IOException{
             out.write("answer   "+m+"*"+q+"+"+ss.get(kk)+" = "+(m*q+ss.get(kk))+"   ");
             if(h==Modpow((long)g,(long)(m*q+ss.get(kk)),p)) out.write("  -  Verifed!");
              return;
+        }
+    }
+}
+// Strongly Connected Components
+static class Strongly_Connected_Components{
+
+    static Stack<Integer> s=new Stack<>();
+    static int[] in,low; static int timer=0;
+    static List<Integer>[] g;
+    static List<List<Integer>> l;
+    static boolean[] instack;
+    static void dfs(int u){
+        in[u]=low[u]=timer++;
+        s.push(u); instack[u]=true;
+        for(int v:g[u]){
+            if(in[v]==-1){
+                dfs(v);
+                low[u]=Math.min(low[u],low[v]);
+            }
+            else if(instack[v]){
+                low[u]=Math.min(low[u],in[v]);
+            }
+        }
+        if(in[u]==low[u]){
+            List<Integer> comp=new ArrayList<>();
+            while(true){
+                int j=s.pop();
+                instack[j]=false;
+                comp.add(j);
+                if(u==j) break;
+            }
+            l.add(comp);
+        }
+    }
+}
+// Articulation point..cut vertex
+
+static class Articulation_point{
+    List<Integer>[] g;int n;
+    int[] in,low; boolean[] b;
+    int count,timer;
+    Set<Integer> s=new HashSet<>();
+
+     void dfs(int u,int p){
+        in[u]=low[u]=timer++;
+        int child=0; b[u]=true;
+        for(int v:g[u]){
+            if(v==p) continue;
+            if(!b[v]){
+                dfs(v,u);
+                low[u]=Math.min(low[u],low[v]);
+                child++;
+                if(low[v]>=in[u]&&p!=-1) s.add(u);//p!=-1 means u is not rot
+            }
+            else{
+                low[u]=Math.min(low[u],in[v]);
+            }
+        }
+        if(p==-1&&child>1) s.add(u);
+    }
+     void go(){
+        for(int i=1;i<=n;i++){
+            if(!b[i]) dfs(i,-1);
+        }
+    }
+}
+// Brdiges...cut edges
+static class Bridge{
+    List<Integer>[] g;int n;
+    int[] in,low; boolean[] b;
+    int count,timer;
+    List<int[]> l=new ArrayList<>();
+    
+     void dfs(int u,int p){
+        in[u]=low[u]=timer++;
+        b[u]=true;
+        for(int v:g[u]){
+            if(v==p) continue;
+            if(!b[v]){
+                dfs(v,u);
+                low[u]=Math.min(low[u],low[v]);
+                if(low[v]>in[u]) l.add(new int[]{u,v});
+            }
+            else{
+                low[u]=Math.min(low[u],in[v]);
+            }
+        }
+    }
+     void go(){
+        for(int i=1;i<=n;i++){
+            if(!b[i]) dfs(i,-1);
         }
     }
 }
@@ -271,7 +363,25 @@ static int bfs(int[][] g, int[] parent,int n, int m){
         }
         return max_flow;
   }
-//.....................
+//.....................dijkstra shortest path
+  static void dijkstra(List<int[]>[] g, int s, int[] d,int n){
+    PriorityQueue<int[]> pq=new PriorityQueue<>((x,y)->f(x,y));
+    boolean[] b=new boolean[n+1];
+    d[s]=0; pq.add(new int[]{s,0});
+    while(!pq.isEmpty()){
+        int[] curr=pq.poll();
+        int p=curr[0];
+        if(b[p]) continue;
+        b[p]=true;
+        for(int[] c:g[p]){
+            if(b[c[0]]) continue;
+            if(d[p]+c[1]<d[c[0]]){
+                d[c[0]]=d[p]+c[1];
+                pq.add(new int[]{c[0],d[c[0]]});
+            }
+        }
+    }
+}
 // Compute factors of all number from 1 to N
 static void spf(int n, int[] spf){
         for(int i=2;i<=(int)Math.sqrt(n);i++){
@@ -355,16 +465,18 @@ static long[] f;
 //
   //  OTHER LCA simpler
 
-  f[1][0]=1;
-  for(int i=2;i<=n;i++){
-      f[i][0]=int_v(read());
-      h[i]=h[f[i][0]]+1;
-  }
-  for(int i=1;i<20;i++){
-      for(int j=2;j<=n;j++){
-          f[j][i]=f[f[j][i-1]][i-1];
-      }
-  }
+  //f[1][0]=1;
+ static void construct_for_lca(){
+    for(int i=2;i<=n;i++){
+        f[i][0]=int_v(read());
+        h[i]=h[f[i][0]]+1;
+    }
+    for(int i=1;i<20;i++){
+        for(int j=2;j<=n;j++){
+            f[j][i]=f[f[j][i-1]][i-1];
+        }
+    }
+ }
   // base case
   static int lca(int u, int v){
     if(h[u]>h[v]){
