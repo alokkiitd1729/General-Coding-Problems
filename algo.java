@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 import java.math.BigInteger; 
-
+// long B=972663749,A=911382323;
  public class algo{
 /// functions
   static BufferedReader s1;
@@ -20,11 +20,32 @@ static long ModInv(long a,long m){return Modpow(a,m-2,m);}
 static long nck(int n,int r,long m){if(r>n){return 0l;}return Modmul(f[n],ModInv(Modmul(f[n-r],f[r],m),m),m);}
 static long[] f;
 
-static String setpreciosion(double d,int k){BigDecimal d1 = new BigDecimal(Double.toString(d));return d1.setScale(k,RoundingMode.UP).toString();//UP DOWN,  .doubleValue()} 
+static String setpreciosion(double d,int k){BigDecimal d1 = new BigDecimal(Double.toString(d));return d1.setScale(k,RoundingMode.UP).toString();} //UP DOWN,  .doubleValue() 
 // rec Inv
-long[] inv=new long[1000001];inv[0]=inv[1]=1;
-    inv[i]=mod-Modmul(mod/i,inv[mod%i],mod);
-  }
+static class Inv{
+    void Inv(){
+        long[] inv=new long[1000001];inv[0]=inv[1]=1;
+        inv[i]=mod-Modmul(mod/i,inv[mod%i],mod);
+    }
+}
+// find (a*b) mod c; a,b,c ~ 10^18
+// useful for Hasing but time complexity is O(bits*...)
+static class long_mult{
+    // Hashing using a pair of mod1,mod2<=1e9
+    // https://pastebin.com/iaVp6ypH
+    long mult_mod(long a,long b,long c){
+        if (a < b){a^=b^=a^=b;} //swap(a, b);
+        long r = 0, m = a;
+        for (int i = 0; i < 64; ++i){
+            if ((1l<<i) > b) break;
+            if (b&1l<<i) r = (r+m)%c;
+            m = (m*2)%c;
+        }
+        return r;
+    }
+}
+
+  
 // KMP/Z function String processing... S-riginal string
 // KMP ->  P[i] = length  of longest prefix which is also suffix of S[0.....i](S.substring(0,i));
 // Z[i] = length of longest prefix of S which is also prefix of (the suffix string S[i,i+1,...n] - i.e suffix of S starting at i)
@@ -45,6 +66,49 @@ static int kmp(String s2){
         return p[n];
   }
 ///////////////////////////////////
+
+// Floyad warshell print path+All pair shortest path
+static void All_pair_shortest(){
+  // problem example
+  // https://atcoder.jp/contests/abc051/tasks/abc051_d
+     int[] x=int_arr();
+      int n=x[0],m=x[1];
+      int[][] g=new int[n+1][n+1];
+      int[][] next=new int[n+1][n+1];
+      boolean[][] b=new boolean[n+1][n+1];
+      for(int i=0;i<m;i++){
+        int[] e=int_arr();
+        g[e[0]][e[1]]=e[2];
+        g[e[1]][e[0]]=e[2];
+      }
+      for(int i=1;i<=n;i++){
+        for(int j=1;j<=n;j++){
+          if(g[i][j]==0)g[i][j]=(int)mod;
+          else next[i][j]=j;
+        }
+      }
+
+      for(int k=1;k<=n;k++){
+        for(int i=1;i<=n;i++){
+          for(int j=1;j<=n;j++){
+            if(g[i][j]>g[i][k]+g[k][j]){
+              g[i][j]=g[i][k]+g[k][j];
+              next[i][j]=next[i][k];
+            }
+          }
+        }
+      }
+      
+      for(int i=1;i<=n;i++){
+        for(int j=i+1;j<=n;j++){
+          int u=i,v=j;
+          while(u!=v){
+            b[u][next[u][v]]=true;
+            u=next[u][v];
+          }
+        }
+      }
+}
 static void babystep(int g, int h, int p) throws  IOException{
     out.write("step1..........\n");
     int m=(int)Math.ceil((double)Math.sqrt(p));
@@ -70,6 +134,65 @@ static void babystep(int g, int h, int p) throws  IOException{
              return;
         }
     }
+}
+// Digit DP
+static class digitDp{
+
+static pair[][] dp;
+static class pair{
+    long e;long o;
+    pair(long e1,long o1){e=e1;o=o1;}
+}
+static pair ok(String s,int k,int tight) throws  IOException {
+    if(k==1){
+        if(tight==0){
+            return dp[k][tight]=new pair(5,5);
+        }
+        else{
+            int c=s.charAt(s.length()-k)-'0';
+            return dp[k][tight]=new pair(c/2+1,(c+1)/2);
+        }
+    }
+    if(dp[k][tight]!=null) return dp[k][tight];
+    int ub=tight==1?(s.charAt(s.length()-k)-'0'):9;
+    long e=0,o=0;
+    for(int i=0;i<=ub;i++){
+        int f=i<ub?0:1; int ss=f&tight;
+        pair p=ok(s,k-1,ss);
+        if(i%2==1) o+=p.e;
+        else e+=p.o;
+    }
+    return dp[k][tight]=new pair(e,o);
+}
+
+}
+// finad all cycle in the undirected Graph
+static class All_Ccycles{
+  static List<int[]>[] g;
+  static boolean[] b;
+  static List<List<Integer>> cycle;
+  static int[] mark,bap;
+  static void dfs(int u,int p) throws  IOException{
+      if(mark[u]==2) return; 
+      if(mark[u]==1){    // visited but in system
+          List<Integer> l=new ArrayList<>();
+          l.add(u);
+          int curr=p;
+          while(curr!=u){
+              l.add(curr);
+              curr=bap[curr];
+          }
+          l.add(u); 
+          cycle.add(l);
+          return;
+      }
+      mark[u]=1;bap[u]=p;
+      for(int[] c:g[u]){
+          int v=c[0];
+          if(v!=p) dfs(v,u);
+      }
+      mark[u]=2;// finished
+  }
 }
 // Strongly Connected Components
 static class Strongly_Connected_Components{
@@ -371,8 +494,9 @@ static int bfs(int[][] g, int[] parent,int n, int m){
     while(!pq.isEmpty()){
         int[] curr=pq.poll();
         int p=curr[0];
-        if(b[p]) continue;
-        b[p]=true;
+        //if(b[p]) continue;
+        //b[p]=true;
+        if(d[p[0]]>p[1]) continue;
         for(int[] c:g[p]){
             if(b[c[0]]) continue;
             if(d[p]+c[1]<d[c[0]]){
@@ -636,6 +760,17 @@ static long[] egcd(long a, long b) {
     return (egcd(x, m)[1] + m) % m; 
   }
 
+/*
+
+static void usaco1() throws  IOException{
+        FileReader in = new FileReader("gymnastics.in");
+        File file = new File("gymnastics.out");
+        FileWriter f1 = new FileWriter(file);
+        s1 = new BufferedReader(in);
+        out= new BufferedWriter(f1);
+        solve();
+}
+*/
  
     public static void main(String[] args) { 
        //assign();
@@ -651,3 +786,165 @@ static long[] egcd(long a, long b) {
           out.flush();
     } 
 } 
+
+
+
+/*
+#include <iostream>
+#include <vector>
+#include <map>
+#include <queue>
+#include <utility>
+
+typedef std::pair<int, int> ii;
+
+template <class T = int>
+class Dinic {
+public:
+  struct Edge {
+    Edge(int a, T b){to = a;cap = b;}
+    int to;
+    T cap;
+  };
+
+  Dinic(int n) {
+    edges.resize(n);
+    this->n = n;
+  }
+
+  T maxFlow(int src, int sink) {
+    T ans = 0;
+    while(bfs(src, sink)) {
+      T flow;
+      pt = std::vector<int>(n, 0);
+      while(flow = dfs(src, sink)) {
+        ans += flow;
+      }
+    }
+    return ans;
+  }
+
+  void addEdge(int from, int to, T cap = 1) {
+    edges[from].push_back(list.size());
+    list.push_back(Edge(to, cap));
+    edges[to].push_back(list.size());
+    list.push_back(Edge(from, 0));
+  }
+private:
+  int n;
+  std::vector<std::vector<int> > edges;
+  std::vector<Edge> list;
+  std::vector<int> h, pt;
+
+  T dfs(int on, int sink, T flow = 1e9) {
+    if(flow == 0) {
+      return 0;
+    } if(on == sink) {
+      return flow;
+    }
+    for(; pt[on] < edges[on].size(); pt[on]++) {
+      int cur = edges[on][pt[on]];
+      if(h[on] + 1 != h[list[cur].to]) {
+        continue;
+      }
+      T got = dfs(list[cur].to, sink, std::min(flow, list[cur].cap));
+      if(got) {
+        list[cur].cap -= got;
+        list[cur ^ 1].cap += got;
+        return got;
+      }
+    }
+    return 0;
+  }
+
+  bool bfs(int src, int sink) {
+    h = std::vector<int>(n, n);
+    h[src] = 0;
+    std::queue<int> q;
+    q.push(src);
+    while(!q.empty()) {
+      int on = q.front();
+      q.pop();
+      for(auto a : edges[on]) {
+        if(list[a].cap == 0) {
+          continue;
+        }
+        int to = list[a].to;
+        if(h[to] > h[on] + 1) {
+          h[to] = h[on] + 1;
+          q.push(to);
+        }
+      }
+    }
+    return h[sink] < n;
+  }
+};
+
+std::vector<ii> divs(int n) {
+  std::vector<ii> ans;
+  for(int i = 2; i * i <= n; i++) {
+    int f = 0;
+    while(n % i == 0) {
+      n /= i;
+      f++;
+    }
+    if(f) {
+      ans.emplace_back(i, f);
+    }
+  }
+  if(n > 1) {
+    ans.emplace_back(n, 1);
+  }
+  return ans;
+}
+
+int main() {
+  std::ios_base::sync_with_stdio(false); std::cin.tie(NULL);
+  int n, m;
+  std::cin >> n >> m;
+  std::vector<int> a(n);
+  for(int i = 0; i < n; i++) {
+    std::cin >> a[i];
+  }
+  std::map<int, std::map<int, int>> freqs;
+  std::vector<ii> edges;
+  Dinic<int> base(n + 2);
+  int src = n, sink = n + 1;
+  for(int i = 0; i < m; i++) {
+    int u, v;
+    std::cin >> u >> v;
+    u--;
+    v--;
+    if(u % 2 == 1) {
+      std::swap(u, v);
+    }
+    edges.emplace_back(u, v);
+    base.addEdge(u, v, 100);
+  }
+  for(int i = 0; i < n; i++) {
+    auto v = divs(a[i]);
+    for(auto d : v) {
+      freqs[d.first][i] = d.second;
+    }
+  }
+  int ans = 0;
+  for(auto g : freqs) {
+    Dinic<int> graph = base;
+    //std::cout << "for " << g.first << std::endl;
+    for(auto f : g.second) {
+      int u = f.first;
+      int c = f.second;
+      //std::cout << "cap " << c << ", ";
+      if(u % 2 == 0) {
+        //std::cout << "adding first type for " << u << std::endl;
+        graph.addEdge(src, u, c);
+      } else {
+        //std::cout << "adding second type for " << u << std::endl;
+        graph.addEdge(u, sink, c);
+      }
+    }
+    ans += graph.maxFlow(src, sink);
+  }
+  std::cout << ans << std::endl;
+}
+*/
